@@ -150,11 +150,18 @@ class SingleChildScrollView extends StatelessWidget {
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
+<<<<<<< HEAD
   })  : assert(scrollDirection != null),
         assert(dragStartBehavior != null),
         assert(clipBehavior != null),
         assert(
           !(controller != null && primary == true),
+=======
+  }) : assert(scrollDirection != null),
+       assert(dragStartBehavior != null),
+       assert(clipBehavior != null),
+       assert(!(controller != null && (primary ?? false)),
+>>>>>>> fb57da5f945d02ef4f98dfd9409a72b7cce74268
           'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
           'You cannot both set primary to true and pass an explicit controller.',
         ),
@@ -320,6 +327,15 @@ class _SingleChildViewport extends SingleChildRenderObjectWidget {
       ..offset = offset
       ..clipBehavior = clipBehavior;
   }
+
+  @override
+  SingleChildRenderObjectElement createElement() {
+    return _SingleChildViewportElement(this);
+  }
+}
+
+class _SingleChildViewportElement extends SingleChildRenderObjectElement with NotifiableElementMixin, ViewportElementMixin {
+  _SingleChildViewportElement(_SingleChildViewport widget) : super(widget);
 }
 
 class _RenderSingleChildViewport extends RenderBox
@@ -664,6 +680,12 @@ class _RenderSingleChildViewport extends RenderBox
       duration: duration,
       curve: curve,
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('offset', _paintOffset));
   }
 
   @override

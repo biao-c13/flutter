@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui show Codec;
-import 'dart:ui' show Size, Locale, TextDirection, hashValues;
+import 'dart:ui' show Size, Locale, TextDirection;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -111,8 +111,12 @@ class ImageConfiguration {
   }
 
   @override
+<<<<<<< HEAD
   int get hashCode =>
       hashValues(bundle, devicePixelRatio, locale, size, platform);
+=======
+  int get hashCode => Object.hash(bundle, devicePixelRatio, locale, size, platform);
+>>>>>>> fb57da5f945d02ef4f98dfd9409a72b7cce74268
 
   @override
   String toString() {
@@ -387,8 +391,12 @@ abstract class ImageProvider<T extends Object> {
     _createErrorHandlerAndKey(
       configuration,
       (T key, ImageErrorListener innerHandleError) {
+<<<<<<< HEAD
         completer
             .complete(PaintingBinding.instance!.imageCache!.statusForKey(key));
+=======
+        completer.complete(PaintingBinding.instance.imageCache.statusForKey(key));
+>>>>>>> fb57da5f945d02ef4f98dfd9409a72b7cce74268
       },
       (T? key, Object exception, StackTrace? stack) async {
         if (handleError != null) {
@@ -438,6 +446,7 @@ abstract class ImageProvider<T extends Object> {
       didError = true;
     }
 
+<<<<<<< HEAD
     // If an error is added to a synchronous completer before a listener has been
     // added, it can throw an error both into the zone and up the stack. Thus, it
     // looks like the error has been caught, but it is in fact also bubbling to the
@@ -456,21 +465,23 @@ abstract class ImageProvider<T extends Object> {
     );
     dangerZone.runGuarded(() {
       Future<T> key;
+=======
+    Future<T> key;
+    try {
+      key = obtainKey(configuration);
+    } catch (error, stackTrace) {
+      handleError(error, stackTrace);
+      return;
+    }
+    key.then<void>((T key) {
+      obtainedKey = key;
+>>>>>>> fb57da5f945d02ef4f98dfd9409a72b7cce74268
       try {
-        key = obtainKey(configuration);
+        successCallback(key, handleError);
       } catch (error, stackTrace) {
         handleError(error, stackTrace);
-        return;
       }
-      key.then<void>((T key) {
-        obtainedKey = key;
-        try {
-          successCallback(key, handleError);
-        } catch (error, stackTrace) {
-          handleError(error, stackTrace);
-        }
-      }).catchError(handleError);
-    });
+    }).catchError(handleError);
   }
 
   /// Called by [resolve] with the key returned by [obtainKey].
@@ -497,8 +508,12 @@ abstract class ImageProvider<T extends Object> {
     // the image we want before getting to this method. We should avoid calling
     // load again, but still update the image cache with LRU information.
     if (stream.completer != null) {
+<<<<<<< HEAD
       final ImageStreamCompleter? completer =
           PaintingBinding.instance!.imageCache!.putIfAbsent(
+=======
+      final ImageStreamCompleter? completer = PaintingBinding.instance.imageCache.putIfAbsent(
+>>>>>>> fb57da5f945d02ef4f98dfd9409a72b7cce74268
         key,
         () => stream.completer!,
         onError: handleError,
@@ -506,10 +521,14 @@ abstract class ImageProvider<T extends Object> {
       assert(identical(completer, stream.completer));
       return;
     }
+<<<<<<< HEAD
     final ImageStreamCompleter? completer =
         PaintingBinding.instance!.imageCache!.putIfAbsent(
+=======
+    final ImageStreamCompleter? completer = PaintingBinding.instance.imageCache.putIfAbsent(
+>>>>>>> fb57da5f945d02ef4f98dfd9409a72b7cce74268
       key,
-      () => load(key, PaintingBinding.instance!.instantiateImageCodec),
+      () => load(key, PaintingBinding.instance.instantiateImageCodec),
       onError: handleError,
     );
     if (completer != null) {
@@ -566,7 +585,7 @@ abstract class ImageProvider<T extends Object> {
       ImageConfiguration configuration = ImageConfiguration.empty}) async {
     cache ??= imageCache;
     final T key = await obtainKey(configuration);
-    return cache!.evict(key);
+    return cache.evict(key);
   }
 
   /// Converts an ImageProvider's settings plus an ImageConfiguration to a key
@@ -635,7 +654,7 @@ class AssetBundleImageKey {
   }
 
   @override
-  int get hashCode => hashValues(bundle, name, scale);
+  int get hashCode => Object.hash(bundle, name, scale);
 
   @override
   String toString() =>
@@ -685,11 +704,11 @@ abstract class AssetBundleImageProvider
     try {
       data = await key.bundle.load(key.name);
     } on FlutterError {
-      PaintingBinding.instance!.imageCache!.evict(key);
+      PaintingBinding.instance.imageCache.evict(key);
       rethrow;
     }
     if (data == null) {
-      PaintingBinding.instance!.imageCache!.evict(key);
+      PaintingBinding.instance.imageCache.evict(key);
       throw StateError('Unable to read data');
     }
     return decode(data.buffer.asUint8List());
@@ -719,7 +738,7 @@ class ResizeImageKey {
   }
 
   @override
-  int get hashCode => hashValues(_providerCacheKey, _width, _height);
+  int get hashCode => Object.hash(_providerCacheKey, _width, _height);
 }
 
 /// Instructs Flutter to decode the image at the specified dimensions
@@ -912,7 +931,7 @@ class FileImage extends ImageProvider<FileImage> {
 
     if (bytes.lengthInBytes == 0) {
       // The file may become available later.
-      PaintingBinding.instance!.imageCache!.evict(key);
+      PaintingBinding.instance.imageCache.evict(key);
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
 
@@ -928,7 +947,7 @@ class FileImage extends ImageProvider<FileImage> {
   }
 
   @override
-  int get hashCode => hashValues(file.path, scale);
+  int get hashCode => Object.hash(file.path, scale);
 
   @override
   String toString() =>
@@ -1001,7 +1020,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   }
 
   @override
-  int get hashCode => hashValues(bytes.hashCode, scale);
+  int get hashCode => Object.hash(bytes.hashCode, scale);
 
   @override
   String toString() =>
@@ -1145,7 +1164,7 @@ class ExactAssetImage extends AssetBundleImageProvider {
   }
 
   @override
-  int get hashCode => hashValues(keyName, scale, bundle);
+  int get hashCode => Object.hash(keyName, scale, bundle);
 
   @override
   String toString() =>
